@@ -39,4 +39,4 @@ jobs:
             export PORT=${{ env.PORT }}
             export DATABASE_URL=${{ env.DATABASE_URL }}
             cd home
-            docker compose up
+            sudo docker compose up
