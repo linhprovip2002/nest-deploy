@@ -1,0 +1,42 @@
+name: Push-to-EC2
+
+# Trigger deployment only on push to main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to EC2 on main branch push
+    runs-on: ubuntu-latest
+
+    env:
+      PORT: 3000
+      DATABASE_URL: mongodb+srv://nhatlinhdut3:td1uAMAgupGhminV@pbl7.ozxnm0y.mongodb.net/test?retryWrites=true&w=majority&appName=pbl7
+
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v2
+
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+          PORT: ${{ env.PORT }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            export PORT=${{ env.PORT }}
+            export DATABASE_URL=${{ env.DATABASE_URL }}
+            cd home
+            docker compose up
